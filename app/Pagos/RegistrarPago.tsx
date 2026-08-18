@@ -45,8 +45,29 @@ export default function RegistrarPago({
 
   if (!abierto || !cliente) return null;
 
-  async function guardarPago() {
-    try {
+ async function guardarPago() {
+  const cantidadPago = Number(cantidad);
+
+  if (!cantidad || cantidadPago <= 0) {
+    alert("⚠️ Escribe una cantidad válida para el pago.");
+    return;
+  }
+
+  if (Number(cliente.saldo || 0) <= 0) {
+    alert("🟢 Este trabajo ya está liquidado.");
+    return;
+  }
+
+  if (cantidadPago > Number(cliente.saldo || 0)) {
+    alert(
+      `⚠️ El pago no puede ser mayor al saldo pendiente de $${Number(
+        cliente.saldo || 0
+      ).toLocaleString("es-MX")}.`
+    );
+    return;
+  }
+
+  try {
       const res = await fetch("/api/pagos", {
         method: "POST",
         headers: {
