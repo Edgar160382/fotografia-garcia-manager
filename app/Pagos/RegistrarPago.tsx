@@ -94,7 +94,40 @@ location.reload();
   );
 const totalPagado =
   Number(cliente.anticipo || 0) + totalPagos;
+async function eliminarPago(id: number) {
+  const confirmar = confirm(
+    "¿Seguro que quieres eliminar este pago?"
+  );
 
+  if (!confirmar) return;
+
+  try {
+    const res = await fetch(`/api/pagos?id=${id}`, {
+      method: "DELETE",
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.error || "Error al eliminar el pago");
+      return;
+    }
+
+    alert(
+      `🗑️ Pago eliminado correctamente\n\n` +
+      `Saldo nuevo: $${Number(
+        data.agenda.saldo
+      ).toLocaleString("es-MX")}`
+    );
+
+    await cargarPagos();
+
+    location.reload();
+  } catch (error) {
+    console.error(error);
+    alert("Error al eliminar el pago");
+  }
+}
   return (
     <div
       style={{
@@ -289,6 +322,20 @@ const totalPagado =
                     📝 {pago.observaciones}
                   </>
                 )}
+                <button
+  onClick={() => eliminarPago(pago.id)}
+  style={{
+    marginTop: "8px",
+    background: "#dc2626",
+    color: "white",
+    border: "none",
+    padding: "6px 12px",
+    borderRadius: "6px",
+    cursor: "pointer",
+  }}
+>
+  🗑️ Eliminar
+</button>
               </div>
             ))}
 

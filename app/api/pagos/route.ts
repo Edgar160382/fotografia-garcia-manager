@@ -126,4 +126,73 @@ export async function POST(req: Request) {
     );
   }
 }
+export async function DELETE(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url);
 
+    const pagoId = Number(searchParams.get("id"));
+
+    if (!pagoId) {
+      return NextResponse.json(
+        { error: "id del pago es obligatorio" },
+        { status: 400 }
+      );
+    }
+
+    const pago = await prisma.pago.findUnique({
+      where: {
+        id: pagoId,
+      },
+    });
+
+    if (!pago) {
+      return NextResponse.json(
+        { error: "Pago no encontrado" },
+        { status: 404 }
+      );
+    }
+
+    const resultado = await prisma.$transaction(async (tx) => {
+      const pagoEliminado = await tx.pago.delete({
+        where: {
+          id: pagoId,
+        },
+      });
+
+      const agenda = await tx.agenda.findUnique({
+        where: {
+          id: pago.agendaId,
+        },
+      });
+
+      if (!agenda) {
+        throw new Error("Agenda no encontrada");
+      }
+
+      const nuevoSaldo = agenda.saldo + pago.cantidad;
+
+      const agendaActualizada = await tx.agenda.update({
+        where: {
+          id: pago.agendaId,
+        },
+        data: {
+          saldo: nuevoSaldo,
+        },
+      });
+
+      return {
+        pago: pagoEliminado,
+        agenda: agendaActualizada,
+      };
+    });
+
+    return NextResponse.json(resultado);
+  } catch (error) {
+    console.error(error);
+
+    return NextResponse.json(
+      { error: "Error al eliminar el pago" },
+      { status: 500 }
+    );
+  }
+}
