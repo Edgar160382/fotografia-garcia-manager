@@ -1,0 +1,59 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Cliente {
+  id        Int       @id @default(autoincrement())
+  nombre    String
+  telefono  String
+  facebook  String?
+  createdAt DateTime  @default(now())
+  agendas   Agenda[]
+  entregas  Entrega[]
+}
+
+model Entrega {
+  id            Int      @id @default(autoincrement())
+  clienteId     Int
+  tipoTrabajo   String
+  fechaEvento   DateTime
+  fechaEntrega  DateTime
+  estado        String   @default("Pendiente")
+  observaciones String?
+  createdAt     DateTime @default(now())
+  cliente       Cliente  @relation(fields: [clienteId], references: [id])
+}
+
+model Agenda {
+  id            Int       @id @default(autoincrement())
+  clienteId     Int
+  titulo        String
+  tipoTrabajo   String
+  fechaEvento   DateTime
+  horaEvento    String
+  lugar         String
+  total       Float    @default(0)
+  anticipo      Float     @default(0)
+  saldo         Float     @default(0)
+  estado        String    @default("Agendado")
+  observaciones String?
+  createdAt     DateTime  @default(now())
+  fechaEntrega  DateTime?
+  cliente       Cliente   @relation(fields: [clienteId], references: [id])
+  pagos         Pago[]
+}
+
+model Pago {
+  id            Int      @id @default(autoincrement())
+  agendaId      Int
+  fecha         DateTime @default(now())
+  cantidad      Float
+  metodo        String
+  observaciones String?
+  createdAt     DateTime @default(now())
+  agenda        Agenda   @relation(fields: [agendaId], references: [id])
+}
