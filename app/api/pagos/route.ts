@@ -196,3 +196,103 @@ export async function DELETE(req: Request) {
     );
   }
 }
+
+export async function PUT(req: Request) {
+  try {
+    const { id, cantidad, metodo, observaciones } = await req.json();
+
+    const pagoId = Number(id);
+    const nuevaCantidad = Number(cantidad);
+
+    if (!pagoId) {
+      return NextResponse.json(
+        { error: "id del pago es obligatorio" },
+        { status: 400 }
+      );
+    }
+
+    if (!nuevaCantidad || nuevaCantidad <= 0) {
+      return NextResponse.json(
+        { error: "La cantidad del pago no es válida" },
+        { status: 400 }
+      );
+    }
+
+    const pagoActual = await prisma.pago.findUnique({
+      where: {
+        id: pagoId,
+      },
+    });
+
+    if (!pagoActual) {
+      return NextResponse.json(
+        { error: "Pago no encontrado" },
+        { status: 404 }
+      );
+    }
+
+    const agenda = await prisma.agenda.findUnique({
+      where: {
+        id: pagoActual.agendaId,
+      },
+    });
+
+    if (!agenda) {
+      return NextResponse.json(
+        { error: "Agenda no encontrada" },
+        { status: 404 }
+      );
+    }
+
+    const nuevoSaldo =
+      agenda.saldo +
+      pagoActual.cantidad -
+      nuevaCantidad;
+
+    if (nuevoSaldo < 0) {
+      return NextResponse.json(
+        {
+          error:
+            "El nuevo pago no puede ser mayor al saldo disponible.",
+        },
+        { status: 400 }
+      );
+    }
+
+    const resultado = await prisma.$transaction(async (tx) => {
+      const pagoActualizado = await tx.pago.update({
+        where: {
+          id: pagoId,
+        },
+        data: {
+          cantidad: nuevaCantidad,
+          metodo,
+          observaciones,
+        },
+      });
+
+      const agendaActualizada = await tx.agenda.update({
+        where: {
+          id: pagoActual.agendaId,
+        },
+        data: {
+          saldo: nuevoSaldo,
+        },
+      });
+
+      return {
+        pago: pagoActualizado,
+        agenda: agendaActualizada,
+      };
+    });
+
+    return NextResponse.json(resultado);
+  } catch (error) {
+    console.error(error);
+
+    return NextResponse.json(
+      { error: "Error al actualizar el pago" },
+      { status: 500 }
+    );
+  }
+}

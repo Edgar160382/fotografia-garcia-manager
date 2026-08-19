@@ -115,6 +115,45 @@ location.reload();
   );
 const totalPagado =
   Number(cliente.anticipo || 0) + totalPagos;
+  async function editarPago(pago: any) {
+  const nuevaCantidad = prompt(
+    "Nueva cantidad del pago:",
+    String(pago.cantidad)
+  );
+
+  if (nuevaCantidad === null) return;
+
+  const cantidad = Number(nuevaCantidad);
+
+  if (!Number.isFinite(cantidad) || cantidad <= 0) {
+    alert("Escribe una cantidad válida.");
+    return;
+  }
+const res = await fetch(`/api/pagos?id=${pago.id}`, {
+  method: "PUT",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+  id: pago.id,
+  cantidad,
+}),
+});
+const data = await res.json();
+
+if (!res.ok) {
+  alert(data.error || "Error al editar el pago");
+  return;
+}
+
+alert(
+  `✏️ Pago actualizado correctamente\n\n` +
+  `Saldo nuevo: $${Number(data.agenda.saldo).toLocaleString("es-MX")}`
+);
+
+await cargarPagos();
+location.reload();
+}
 async function eliminarPago(id: number) {
   const confirmar = confirm(
     "¿Seguro que quieres eliminar este pago?"
@@ -356,6 +395,12 @@ async function eliminarPago(id: number) {
   }}
 >
   🗑️ Eliminar
+</button>
+
+<button
+  onClick={() => editarPago(pago)}
+>
+  ✏️ Editar
 </button>
               </div>
             ))}
