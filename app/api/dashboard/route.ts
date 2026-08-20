@@ -130,6 +130,7 @@ const futuras = agenda.filter((evento) => {
   anticipos,
   saldos,
 totalPagos,
+liquidados,
   vencidas,
   entregasHoy,
   proximos7Dias,
