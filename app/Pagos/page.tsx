@@ -11,13 +11,22 @@ export default function Pagos() {
   const [clienteSeleccionado, setClienteSeleccionado] =
     useState<any>(null);
 
-  useEffect(() => {
+ useEffect(() => {
+  cargarClientes();
+
+  const intervalo = setInterval(() => {
     cargarClientes();
-  }, []);
+  }, 5000);
+
+  return () => clearInterval(intervalo);
+}, []);
 
   async function cargarClientes() {
     try {
-      const res = await fetch("/api/agenda");
+     const res = await fetch(`/api/agenda?t=${Date.now()}`, {
+  cache: "no-store",
+});
+
       const data = await res.json();
 
       setClientes(data);
