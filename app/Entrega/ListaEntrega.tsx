@@ -16,20 +16,31 @@ export default function ListaEntrega({
   const [estadoFiltro, setEstadoFiltro] = useState("Todos");
 
   useEffect(() => {
-    async function cargarEntregas() {
-      try {
-        const respuesta = await fetch("/api/entregas");
-        const datos = await respuesta.json();
+  async function cargarEntregas() {
+    try {
+      const respuesta = await fetch(`/api/entregas?t=${Date.now()}`, {
+        cache: "no-store",
+      });
 
-        setEntregas(datos);
-      } catch (error) {
-        console.error("Error al cargar entregas:", error);
-      }
+      const datos = await respuesta.json();
+
+      setEntregas(datos);
+    } catch (error) {
+      console.error("Error al cargar entregas:", error);
     }
+  }
 
+  // Cargar inmediatamente
+  cargarEntregas();
+
+  // Actualizar automáticamente cada 30 segundos
+  const intervalo = setInterval(() => {
     cargarEntregas();
-  }, [recargarLista]);
+  }, 30000);
 
+  // Limpiar intervalo al salir de la página
+  return () => clearInterval(intervalo);
+}, [recargarLista]);
   async function eliminarEntrega(id: number) {
     if (!confirm("¿Eliminar esta entrega?")) return;
 
