@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-
+import Link from "next/link";
 export default function Dashboard() {
    const [datos, setDatos] = useState({
   clientes: 0,
@@ -50,6 +50,42 @@ console.log(JSON.stringify(data, null, 2));
     minHeight: "100vh",
   }}
 >
+       <div
+  style={{
+    display: "flex",
+    gap: "10px",
+    marginBottom: "20px",
+  }}
+>
+  <Link
+    href="/Clientes"
+    style={{
+      display: "inline-block",
+      background: "#1976d2",
+      color: "white",
+      padding: "10px 18px",
+      borderRadius: "6px",
+      textDecoration: "none",
+    }}
+  >
+    👥 Clientes
+  </Link>
+
+  <Link
+    href="/Agenda"
+    style={{
+      display: "inline-block",
+      background: "#1976d2",
+      color: "white",
+      padding: "10px 18px",
+      borderRadius: "6px",
+      textDecoration: "none",
+    }}
+  >
+    📅 Agenda
+  </Link>
+</div>
+
       <h1
         style={{
           fontSize: "36px",
