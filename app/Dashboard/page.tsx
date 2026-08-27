@@ -32,13 +32,23 @@ useEffect(() => {
 }, []);
 
 async function cargarDashboard() {
-  const res = await fetch("/api/dashboard");
-  const data = await res.json();
+  try {
+   const res = await fetch(`/api/dashboard?t=${Date.now()}`, {
+  cache: "no-store",
+});
 
-console.log(JSON.stringify(data, null, 2));
+    if (!res.ok) {
+      throw new Error(`Error HTTP: ${res.status}`);
+    }
 
-  setDatos(data);
+    const data = await res.json();
 
+    console.log("DASHBOARD:", data);
+
+    setDatos(data);
+  } catch (error) {
+    console.error("Error cargando dashboard:", error);
+  }
 
 }
   return (
