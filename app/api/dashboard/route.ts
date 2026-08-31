@@ -71,10 +71,12 @@ const liquidados = await prisma.agenda.count({
 });
 const pagos = await prisma.pago.findMany();
 
-const totalPagos = pagos.reduce(
+const totalPagosPosteriores = pagos.reduce(
   (total, pago) => total + Number(pago.cantidad || 0),
   0
 );
+
+const totalPagos = anticipos + totalPagosPosteriores;
 const hoy = new Date();
 hoy.setHours(0, 0, 0, 0);
 

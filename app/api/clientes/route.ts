@@ -55,8 +55,19 @@ export async function DELETE(req: Request) {
     });
 
     return NextResponse.json({ ok: true });
-  } catch (error) {
+    } catch (error: any) {
     console.error(error);
+console.log("ERROR COMPLETO AL ELIMINAR:", error);
+
+   if (error?.code === "P2039") {
+      return NextResponse.json(
+        {
+          error:
+            "⚠️ No se puede eliminar este cliente porque tiene trabajos o información asociada."
+        },
+        { status: 400 }
+      );
+    }
 
     return NextResponse.json(
       { error: "Error al eliminar cliente" },

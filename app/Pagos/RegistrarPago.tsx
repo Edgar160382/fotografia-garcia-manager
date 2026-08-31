@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import ReciboPago from "./ReciboPago";
 
 type Props = {
   abierto: boolean;
@@ -17,7 +18,8 @@ export default function RegistrarPago({
   const [metodo, setMetodo] = useState("Efectivo");
   const [observaciones, setObservaciones] = useState("");
   const [pagos, setPagos] = useState<any[]>([]);
-
+const [reciboAbierto, setReciboAbierto] = useState(false);
+const [pagoRegistrado, setPagoRegistrado] = useState<any>(null);
   useEffect(() => {
     if (abierto && cliente) {
       cargarPagos();
@@ -89,20 +91,17 @@ export default function RegistrarPago({
 
       const data = await res.json();
 
-alert(
-  `💰 Pago registrado correctamente\n\n` +
-  `Pago: $${Number(cantidad).toLocaleString("es-MX")}\n` +
-  `Saldo nuevo: $${Number(data.agenda.saldo).toLocaleString("es-MX")}`
-);
+setPagoRegistrado({
+  ...data.pago,
+  agenda: data.agenda,
+});
 
 setCantidad("");
 setObservaciones("");
 
 await cargarPagos();
 
-cerrar();
-
-location.reload();
+setReciboAbierto(true);
     } catch (error) {
       console.error(error);
       alert("Error al registrar el pago");
@@ -188,7 +187,8 @@ async function eliminarPago(id: number) {
     alert("Error al eliminar el pago");
   }
 }
-  return (
+ return (
+  <>
     <div
       style={{
         position: "fixed",
@@ -422,5 +422,13 @@ async function eliminarPago(id: number) {
         )}
       </div>
     </div>
+         <ReciboPago
+        abierto={reciboAbierto}
+        cerrar={() => setReciboAbierto(false)}
+        cliente={cliente}
+        pago={pagoRegistrado}
+        anticipo={cliente?.anticipo || 0}
+      /> 
+       </>
   );
 }

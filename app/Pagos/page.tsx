@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import RegistrarPago from "./RegistrarPago";
+import ReciboPago from "./ReciboPago";
 
 export default function Pagos() {
   const [clientes, setClientes] = useState<any[]>([]);
@@ -10,6 +12,10 @@ export default function Pagos() {
   const [modalAbierto, setModalAbierto] = useState(false);
   const [clienteSeleccionado, setClienteSeleccionado] =
     useState<any>(null);
+
+const [reciboAbierto, setReciboAbierto] = useState(false);
+const [clienteRecibo, setClienteRecibo] = useState<any>(null);
+const [pagoRecibo, setPagoRecibo] = useState<any>(null);
 
  useEffect(() => {
   cargarClientes();
@@ -45,6 +51,27 @@ export default function Pagos() {
     setClienteSeleccionado(cliente);
     setModalAbierto(true);
   }
+async function abrirRecibo(cliente: any) {
+  try {
+    const res = await fetch(`/api/pagos?agendaId=${cliente.id}`);
+
+    const data = await res.json();
+
+    if (!Array.isArray(data) || data.length === 0) {
+      alert("⚠️ Este trabajo todavía no tiene pagos registrados.");
+      return;
+    }
+
+   const ultimoPago = data[0];
+
+    setClienteRecibo(cliente);
+    setPagoRecibo(ultimoPago);
+    setReciboAbierto(true);
+  } catch (error) {
+    console.error("Error al cargar el recibo:", error);
+    alert("Error al cargar el recibo.");
+  }
+}
 
   function cerrarPago() {
     setModalAbierto(false);
@@ -61,6 +88,20 @@ export default function Pagos() {
 
   return (
     <>
+     <Link
+      href="/Dashboard"
+      style={{
+        display: "inline-block",
+        background: "#1976d2",
+        color: "white",
+        padding: "10px 18px",
+        borderRadius: "6px",
+        textDecoration: "none",
+        margin: "20px 0 0 40px",
+      }}
+    >
+      ⬅️ Regresar al Dashboard
+    </Link>
       <main
         style={{
           padding: "40px",
@@ -172,6 +213,7 @@ export default function Pagos() {
                     {dinero(cliente.anticipo)}
                   </p>
 
+
                   <p>
                     💵 <strong>Saldo pendiente:</strong>{" "}
                     <span
@@ -187,22 +229,45 @@ export default function Pagos() {
                     </span>
                   </p>
                 </div>
+<div
+  style={{
+    display: "flex",
+    gap: "10px",
+    marginTop: "20px",
+    flexWrap: "wrap",
+  }}
+>
+  <button
+    onClick={() => abrirPago(cliente)}
+    style={{
+      background: "#2e7d32",
+      color: "white",
+      border: "none",
+      padding: "12px 22px",
+      borderRadius: "8px",
+      cursor: "pointer",
+      fontSize: "16px",
+    }}
+  >
+    💵 Registrar pago
+  </button>
 
-                <button
-                  onClick={() => abrirPago(cliente)}
-                  style={{
-                    marginTop: "20px",
-                    background: "#2e7d32",
-                    color: "white",
-                    border: "none",
-                    padding: "12px 22px",
-                    borderRadius: "8px",
-                    cursor: "pointer",
-                    fontSize: "16px",
-                  }}
-                >
-                  💵 Registrar pago
-                </button>
+  <button
+    onClick={() => abrirRecibo(cliente)}
+    style={{
+      background: "#1976d2",
+      color: "white",
+      border: "none",
+      padding: "12px 22px",
+      borderRadius: "8px",
+      cursor: "pointer",
+      fontSize: "16px",
+    }}
+  >
+    🧾 Ver recibo
+  </button>
+</div>
+               
               </div>
             ))
           )}
@@ -214,6 +279,16 @@ export default function Pagos() {
         cerrar={cerrarPago}
         cliente={clienteSeleccionado}
       />
+      <ReciboPago
+  abierto={reciboAbierto}
+  cerrar={() => {
+    setReciboAbierto(false);
+    setClienteRecibo(null);
+    setPagoRecibo(null);
+  }}
+  cliente={clienteRecibo}
+  pago={pagoRecibo}
+/>
     </>
   );
 }

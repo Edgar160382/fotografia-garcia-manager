@@ -127,20 +127,42 @@ export async function DELETE(req: Request) {
 
     const id = Number(searchParams.get("id"));
 
-    await prisma.agenda.delete({
-      where: {
-        id,
-      },
+    if (!id || Number.isNaN(id)) {
+      return NextResponse.json(
+        { error: "ID de evento inválido" },
+        { status: 400 }
+      );
+    }
+
+    await prisma.$transaction(async (tx) => {
+      // Primero eliminar los pagos relacionados
+      await tx.pago.deleteMany({
+        where: {
+          agendaId: id,
+        },
+      });
+
+      // Después eliminar el evento de Agenda
+      await tx.agenda.delete({
+        where: {
+          id,
+        },
+      });
     });
 
     return NextResponse.json({
-      mensaje: "Evento eliminado",
+      ok: true,
+      mensaje: "Evento y pagos relacionados eliminados",
     });
-  } catch (error) {
+
+  } catch (error: any) {
+    console.error("ERROR AL ELIMINAR AGENDA:");
     console.error(error);
 
     return NextResponse.json(
-      { error: "Error al eliminar evento" },
+      {
+        error: error.message || "Error al eliminar evento",
+      },
       { status: 500 }
     );
   }

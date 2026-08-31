@@ -3,28 +3,58 @@
 import { useEffect, useState } from "react";
 
 export default function ListaClientes() {
-  const [clientes, setClientes] = useState([]);
+  const [clientes, setClientes] = useState<any[]>([]);
 async function eliminarCliente(id: number) {
   const confirmar = window.confirm("¿Deseas eliminar este cliente?");
 
   if (!confirmar) return;
 
-  await fetch(`/api/clientes?id=${id}`, {
-    method: "DELETE",
-  });
+  try {
+    const respuesta = await fetch(`/api/clientes?id=${id}`, {
+      method: "DELETE",
+    });
 
-  setClientes(clientes.filter((c: any) => c.id !== id));
-}
-  useEffect(() => {
-    async function cargarClientes() {
-      const respuesta = await fetch("/api/clientes");
+    if (!respuesta.ok) {
       const datos = await respuesta.json();
-      console.log(datos)
-      setClientes(datos);
+
+      alert(
+        datos.error ||
+          "⚠️ No se puede eliminar este cliente porque tiene información asociada."
+      );
+
+      return;
     }
 
-    cargarClientes();
-  }, []);
+    setClientes((clientes: any[]) =>
+      clientes.filter((c: any) => c.id !== id)
+    );
+
+    alert("✅ Cliente eliminado correctamente.");
+  } catch (error) {
+    console.error(error);
+    alert("❌ No se pudo eliminar el cliente.");
+  }
+}
+  useEffect(() => {
+  async function cargarClientes() {
+    try {
+      const respuesta = await fetch("/api/clientes");
+      const datos = await respuesta.json();
+
+      if (Array.isArray(datos)) {
+        setClientes(datos);
+      }
+    } catch (error) {
+      console.error("Error al actualizar clientes:", error);
+    }
+  }
+
+  cargarClientes();
+
+  const intervalo = setInterval(cargarClientes, 3000);
+
+  return () => clearInterval(intervalo);
+}, []);
 
   return (
     <div style={{ marginTop: "30px" }}>

@@ -65,6 +65,7 @@ async function cargarDashboard() {
     display: "flex",
     gap: "10px",
     marginBottom: "20px",
+    flexWrap: "wrap",
   }}
 >
   <Link
@@ -93,6 +94,20 @@ async function cargarDashboard() {
     }}
   >
     📅 Agenda
+  </Link>
+
+  <Link
+    href="/Pagos"
+    style={{
+      display: "inline-block",
+      background: "#2e7d32",
+      color: "white",
+      padding: "10px 18px",
+      borderRadius: "6px",
+      textDecoration: "none",
+    }}
+  >
+    💰 Pagos
   </Link>
 </div>
 
