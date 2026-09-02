@@ -97,17 +97,46 @@ async function cargarDashboard() {
   </Link>
 
   <Link
-    href="/Pagos"
-    style={{
-      display: "inline-block",
-      background: "#2e7d32",
-      color: "white",
-      padding: "10px 18px",
-      borderRadius: "6px",
-      textDecoration: "none",
-    }}
-  >
-    💰 Pagos
+  href="/Pagos"
+  style={{
+    display: "inline-block",
+    background: "#2e7d32",
+    color: "white",
+    padding: "10px 18px",
+    borderRadius: "6px",
+    textDecoration: "none",
+  }}
+>
+  💰 Pagos
+</Link>
+
+<Link
+  href="/Calendario"
+  style={{
+    display: "inline-block",
+    background: "#1976d2",
+    color: "white",
+    padding: "10px 18px",
+    borderRadius: "6px",
+    textDecoration: "none",
+  }}
+>
+  📆 Calendario
+</Link>
+
+<Link
+  href="/Entrega"
+  style={{
+    display: "inline-block",
+    background: "#1976d2",
+    color: "white",
+    padding: "10px 18px",
+    borderRadius: "6px",
+    textDecoration: "none",
+  }}
+>
+  📦 Entregas
+
   </Link>
 </div>
 

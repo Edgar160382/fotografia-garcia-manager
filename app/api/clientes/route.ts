@@ -48,26 +48,45 @@ export async function DELETE(req: Request) {
     const { searchParams } = new URL(req.url);
     const id = Number(searchParams.get("id"));
 
-    await prisma.cliente.delete({
-      where: {
-        id,
+    if (!id) {
+      return NextResponse.json(
+        { error: "ID de cliente inválido" },
+        { status: 400 }
+      );
+    }
+
+    const cliente = await prisma.cliente.findUnique({
+      where: { id },
+      include: {
+        agendas: true,
+        entregas: true,
       },
     });
 
-    return NextResponse.json({ ok: true });
-    } catch (error: any) {
-    console.error(error);
-console.log("ERROR COMPLETO AL ELIMINAR:", error);
+    if (!cliente) {
+      return NextResponse.json(
+        { error: "Cliente no encontrado" },
+        { status: 404 }
+      );
+    }
 
-   if (error?.code === "P2039") {
+    if (cliente.agendas.length > 0 || cliente.entregas.length > 0) {
       return NextResponse.json(
         {
           error:
-            "⚠️ No se puede eliminar este cliente porque tiene trabajos o información asociada."
+            "⚠️ No se puede eliminar este cliente porque tiene trabajos o información asociada.",
         },
         { status: 400 }
       );
     }
+
+    await prisma.cliente.delete({
+      where: { id },
+    });
+
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    console.error("ERROR COMPLETO AL ELIMINAR:", error);
 
     return NextResponse.json(
       { error: "Error al eliminar cliente" },

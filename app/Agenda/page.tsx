@@ -167,7 +167,13 @@ async function eliminarEvento(id: number) {
       : ""
   );
 
-  setObservaciones(evento.observaciones ?? "");
+   setObservaciones(evento.observaciones ?? "");
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
+
 }
  return (
   <main
@@ -380,6 +386,9 @@ async function eliminarEvento(id: number) {
         >
           {eventoEditando ? "Actualizar Evento" : "Guardar Evento"}
         </button>
+
+ </div>
+
        <div
   className="form-card"
   style={{ marginTop: "40px" }}
@@ -387,8 +396,10 @@ async function eliminarEvento(id: number) {
   <h2 className="section-title">
     Eventos Agendados
   </h2>
+<div style={{ overflowX: "auto", width: "100%" }}>
 
   <table
+   className="agenda-table"
     style={{
       width: "100%",
       borderCollapse: "collapse",

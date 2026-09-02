@@ -4,7 +4,7 @@ import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import { useEffect, useState } from "react";
-
+import Link from "next/link";
 export default function Calendario() {
   const [eventos, setEventos] = useState<any[]>([]);
   const [eventoSeleccionado, setEventoSeleccionado] = useState<any>(null);
@@ -100,6 +100,20 @@ async function guardarCambios() {
         minHeight: "100vh",
       }}
     >
+      <Link
+  href="/Dashboard"
+  style={{
+    display: "inline-block",
+    background: "#1976d2",
+    color: "white",
+    padding: "10px 18px",
+    borderRadius: "6px",
+    textDecoration: "none",
+    marginBottom: "25px",
+  }}
+>
+  ⬅️ Dashboard
+</Link>
       <h1 style={{ marginBottom: "30px" }}>
         📅 Calendario de Eventos
       </h1>

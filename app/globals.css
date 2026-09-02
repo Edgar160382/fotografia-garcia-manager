@@ -176,3 +176,76 @@ body {
     margin: 10mm;
   }
 }
+/* ---------- AGENDA EN CELULAR ---------- */
+
+@media (max-width: 600px) {
+
+  .agenda-table {
+    width: 100% !important;
+    min-width: 0 !important;
+    border-collapse: separate !important;
+    border-spacing: 0 15px !important;
+  }
+
+  .agenda-table thead {
+    display: none;
+  }
+
+  .agenda-table tbody,
+  .agenda-table tr,
+  .agenda-table td {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .agenda-table tr {
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 12px;
+    padding: 10px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+  }
+
+  .agenda-table td {
+    text-align: left !important;
+    padding: 8px 10px !important;
+    border: none !important;
+  }
+
+  .agenda-table td::before {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 3px;
+    color: #374151;
+  }
+
+  .agenda-table td:nth-child(1)::before {
+    content: "👤 Cliente";
+  }
+
+  .agenda-table td:nth-child(2)::before {
+    content: "📸 Trabajo";
+  }
+
+  .agenda-table td:nth-child(3)::before {
+    content: "📅 Fecha";
+  }
+
+  .agenda-table td:nth-child(4)::before {
+    content: "🕐 Hora";
+  }
+
+  .agenda-table td:nth-child(5)::before {
+    content: "📌 Estado";
+  }
+
+  .agenda-table td:nth-child(6)::before {
+    content: "⚙️ Acciones";
+  }
+
+  .agenda-table td:nth-child(6) button {
+    margin-top: 5px;
+    margin-right: 8px;
+  }
+}
