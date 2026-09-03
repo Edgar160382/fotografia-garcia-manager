@@ -69,7 +69,7 @@ async function guardarCliente() {
 
    <input
   type="text"
-  placeholder="Facebook"
+ placeholder="WhatsApp"
   value={facebook}
   onChange={(e) => setFacebook(e.target.value)}
   style={{
