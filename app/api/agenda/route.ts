@@ -89,7 +89,11 @@ console.log("CLIENTE:", body.clienteId);
   tipoTrabajo: body.tipoTrabajo,
   fechaEvento: new Date(body.fechaEvento),
   fechaEntrega: body.fechaEntrega
-  ? new Date(`${body.fechaEntrega}T12:00:00`)
+  ? new Date(
+      body.fechaEntrega.includes("T")
+        ? body.fechaEntrega
+        : `${body.fechaEntrega}T12:00:00`
+    )
   : null,
   horaEvento: body.horaEvento,
   lugar: body.lugar,

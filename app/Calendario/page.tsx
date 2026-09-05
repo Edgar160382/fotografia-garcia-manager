@@ -14,29 +14,75 @@ const [modoEdicion, setModoEdicion] = useState(false);
   }, []);
 
   async function cargarEventos() {
-    const res = await fetch("/api/agenda");
-    const data = await res.json();
+  const res = await fetch("/api/agenda");
+  const data = await res.json();
 
-    const eventosCalendario = data.map((evento: any) => ({
+  const eventosCalendario: any[] = [];
+
+  data.forEach((evento: any) => {
+    // 🎨 Color según estado
+    let colorEvento = "#3788d8";
+
+    if (evento.estado === "Entregado") {
+      colorEvento = "#28a745";
+    } else if (evento.estado === "En edición") {
+      colorEvento = "#9b59b6";
+    } else if (evento.estado === "Pendiente de entrega") {
+      colorEvento = "#f39c12";
+    }
+
+    // 📸 EVENTO PRINCIPAL
+    eventosCalendario.push({
       id: evento.id.toString(),
       title: evento.tipoTrabajo,
       date: evento.fechaEvento.split("T")[0],
+      backgroundColor: colorEvento,
+      borderColor: colorEvento,
 
       extendedProps: {
         clienteId: evento.clienteId,
-titulo: evento.titulo,
+        titulo: evento.titulo,
         cliente: evento.cliente?.nombre,
         lugar: evento.lugar,
         hora: evento.horaEvento,
         anticipo: evento.anticipo,
         saldo: evento.saldo,
+        fechaEntrega: evento.fechaEntrega,
         observaciones: evento.observaciones,
         estado: evento.estado,
+        esEntrega: false,
       },
-    }));
+    });
 
-    setEventos(eventosCalendario);
-  }
+    // 📦 FECHA DE ENTREGA
+    if (evento.fechaEntrega) {
+      eventosCalendario.push({
+        id: `${evento.id}-entrega`,
+        title: `📦 Entrega - ${evento.tipoTrabajo}`,
+        date: evento.fechaEntrega.split("T")[0],
+        backgroundColor: "#e67e22",
+        borderColor: "#e67e22",
+
+        extendedProps: {
+          clienteId: evento.clienteId,
+          titulo: evento.titulo,
+          cliente: evento.cliente?.nombre,
+          lugar: evento.lugar,
+          hora: evento.horaEvento,
+          anticipo: evento.anticipo,
+          saldo: evento.saldo,
+          fechaEntrega: evento.fechaEntrega,
+          observaciones: evento.observaciones,
+          estado: evento.estado,
+          esEntrega: true,
+          eventoId: evento.id,
+        },
+      });
+    }
+  });
+
+  setEventos(eventosCalendario);
+}
 async function moverEvento(info: any) {
   const id = Number(info.event.id);
   const fecha = info.event.startStr;
@@ -72,6 +118,7 @@ async function guardarCambios() {
       tipoTrabajo: eventoSeleccionado.title,
       clienteId: eventoSeleccionado.clienteId,
       fechaEvento: eventoSeleccionado.start,
+      fechaEntrega: eventoSeleccionado.fechaEntrega,
       horaEvento: eventoSeleccionado.hora,
       lugar: eventoSeleccionado.lugar,
       anticipo: eventoSeleccionado.anticipo,
@@ -127,15 +174,33 @@ async function guardarCambios() {
           events={eventos}
           editable={true}
 eventDrop={moverEvento}
-          eventClick={(info) => {
-            setEventoSeleccionado({
-              title: info.event.title,
-              id: info.event.id,
-              start: info.event.start,
-              ...info.event.extendedProps,
-            });
-          }}
+         eventClick={(info) => {
+  setEventoSeleccionado({
+    title: info.event.extendedProps.esEntrega
+      ? info.event.extendedProps.titulo
+      : info.event.title,
+    id: info.event.extendedProps.esEntrega
+      ? info.event.extendedProps.eventoId
+      : info.event.id,
+    start: info.event.start,
+    ...info.event.extendedProps,
+  });
+}}
         />
+        <div
+  style={{
+    display: "flex",
+    justifyContent: "center",
+    gap: "25px",
+    marginTop: "20px",
+    flexWrap: "wrap",
+    fontSize: "14px",
+  }}
+>
+  <span>🔵 Evento</span>
+  <span>🟠 📦 Fecha de entrega</span>
+  <span>🟢 Entregado</span>
+</div>
       </div>
 
       {eventoSeleccionado && (
@@ -210,11 +275,63 @@ eventDrop={moverEvento}
 ) : (
   <p><strong>Cliente:</strong> {eventoSeleccionado.cliente}</p>
 )}        
-
+{modoEdicion ? (
+  <div style={{ marginBottom: "15px" }}>
+    <strong>Fecha del evento:</strong>
+    <input
+      type="date"
+      value={
+        eventoSeleccionado.start
+          ? new Date(eventoSeleccionado.start).toLocaleDateString("en-CA")
+          : ""
+      }
+      onChange={(e) =>
+        setEventoSeleccionado({
+          ...eventoSeleccionado,
+          start: new Date(e.target.value + "T12:00:00"),
+        })
+      }
+      style={{
+        width: "100%",
+        padding: "8px",
+        marginTop: "5px",
+      }}
+    />
+  </div>
+) : (
+  <p>
+    <strong>Fecha:</strong>{" "}
+    {eventoSeleccionado.start?.toLocaleDateString()}
+  </p>
+)}
+            
             <p>
-              <strong>Fecha:</strong>{" "}
-              {eventoSeleccionado.start?.toLocaleDateString()}
-            </p>
+  <strong>Fecha de entrega:</strong>{" "}
+  {eventoSeleccionado.fechaEntrega
+    ? eventoSeleccionado.fechaEntrega.split("T")[0].split("-").reverse().join("/")
+    : "Sin fecha"}
+</p>
+
+{modoEdicion && (
+  <div style={{ marginBottom: "15px" }}>
+    <strong>Fecha de entrega:</strong>
+    <input
+      type="date"
+      value={eventoSeleccionado.fechaEntrega?.split("T")[0] || ""}
+      onChange={(e) =>
+        setEventoSeleccionado({
+          ...eventoSeleccionado,
+          fechaEntrega: e.target.value,
+        })
+      }
+      style={{
+        width: "100%",
+        padding: "8px",
+        marginTop: "5px",
+      }}
+    />
+  </div>
+)}
 
            {modoEdicion ? (
   <div style={{ marginBottom: "15px" }}>
@@ -280,12 +397,7 @@ eventDrop={moverEvento}
   <input
     type="text"
     value={eventoSeleccionado.anticipo}
-    onChange={(e) =>
-      setEventoSeleccionado({
-        ...eventoSeleccionado,
-        anticipo: Number(e.target.value.replace(/\D/g, "")),
-      })
-    }
+    readOnly
     style={{
       width: "100%",
       padding: "8px 8px 8px 28px",
@@ -315,12 +427,7 @@ eventDrop={moverEvento}
   <input
     type="text"
     value={eventoSeleccionado.saldo}
-    onChange={(e) =>
-      setEventoSeleccionado({
-        ...eventoSeleccionado,
-        saldo: Number(e.target.value.replace(/\D/g, "")),
-      })
-    }
+    readOnly
     style={{
       width: "100%",
       padding: "8px 8px 8px 28px",
@@ -331,7 +438,34 @@ eventDrop={moverEvento}
 ) : (
   <p><strong>Saldo:</strong> ${eventoSeleccionado.saldo}</p>
 )}  
-            <p><strong>Estado:</strong> {eventoSeleccionado.estado}</p>
+       {modoEdicion ? (
+  <div style={{ marginBottom: "15px" }}>
+    <strong>Estado:</strong>
+    <select
+      value={eventoSeleccionado.estado}
+      onChange={(e) =>
+        setEventoSeleccionado({
+          ...eventoSeleccionado,
+          estado: e.target.value,
+        })
+      }
+      style={{
+        width: "100%",
+        padding: "8px",
+        marginTop: "5px",
+      }}
+    >
+      <option value="Agendado">Agendado</option>
+      <option value="Pendiente de entrega">Pendiente de entrega</option>
+      <option value="En edición">En edición</option>
+      <option value="Entregado">Entregado</option>
+    </select>
+  </div>
+) : (
+  <p>
+    <strong>Estado:</strong> {eventoSeleccionado.estado}
+  </p>
+)}    
 
            {modoEdicion ? (
   <div style={{ marginBottom: "15px" }}>
