@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-
+import { Prisma } from "@prisma/client";
 // ======================
 // LISTAR EVENTOS
 // ======================
@@ -138,7 +138,7 @@ export async function DELETE(req: Request) {
       );
     }
 
-    await prisma.$transaction(async (tx) => {
+   await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // Primero eliminar los pagos relacionados
       await tx.pago.deleteMany({
         where: {
